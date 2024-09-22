@@ -87,3 +87,8 @@ ENV/
 
 # Rope project settings
 .ropeproject
+
+b2share.crt
+b2share.csr
+b2share.key
+psqlpwd

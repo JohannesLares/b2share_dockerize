@@ -1,0 +1,68 @@
+version: '3'
+services:
+    postgres:
+        image: postgres:13
+        environment:
+            - "POSTGRES_PASSWORD=xyz"
+            - "POSTGRES_USER=b2share1"
+            - "POSTGRES_DB=b2sharedb1"
+            - "PGDATA=/var/lib/postgresql/data"
+        volumes:
+            - "/data/b2share/postgres-data:/var/lib/postgresql/data"
+        deploy:
+            placement:
+              constraints:
+                - node.hostname==swarm-1.novalocal
+
+    elasticsearch:
+        build: elasticsearch
+        image: eudatb2share/elasticsearch:2.4.6
+        environment:
+            # Set options for elasticsearch memory usage
+            - bootstrap.memory_lock=true
+            - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+        ulimits:
+          nofile:
+            soft: 1024
+            hard: 1024
+        volumes:
+            - "/data/b2share/elasticsearch-data:/usr/share/elasticsearch/data"
+        deploy:
+            placement:
+              constraints:
+                - node.hostname==swarm-1.novalocal
+
+    redis:
+        image: redis:5-alpine
+        volumes:
+            - "/data/b2share/redis-data:/data"
+        deploy:
+            placement:
+              constraints:
+                - node.hostname==swarm-1.novalocal
+
+    nginx:
+        image: nginx:mainline-alpine
+        ports:
+            - "80:80"
+            - "443:443"
+        configs:
+          - source: nginx-conf
+            target: /etc/nginx/conf.d/b2share.conf
+        secrets:
+          - source: cert
+            target: /etc/ssl/b2share.crt
+          - source: key
+            target: /etc/ssl/b2share.key
+        deploy:
+            mode: global
+
+configs:
+  nginx-conf:
+    file: ./nginx/b2share.conf
+
+secrets:
+  cert:
+    file: ./b2share.crt
+  key:
+    file: ./b2share.key
