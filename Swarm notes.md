@@ -33,12 +33,22 @@ from local machine:
 ssh -L 2375:localhost:2375 almalinux@86.50.228.13
 export DOCKER_HOST='tcp://localhost:2375'
 docker node ls
+iptables -I INPUT -m tcp -p tcp -m multiport -s 0/0 --dports 80,443 -j ACCEPT -m comment --comment "Http(s) access"
 ```
 
 Separated docker-compose file to two. General services to be used with every deployment and application specific. Modified docker compose general file to put all services to node 1, except nginx, that goes to all machines, thus possible to dns to all instances and redirect to correct container.
 
 Added `ulimit -n 1024` to elasticsearch Dockerfile
 
+Added 80 & 443 to security groups
+
+Created a network:
+
+```bash
+docker network create -d overlay b2 --attachable 
+```
+
 ```bash
 docker stack deploy -c docker-compose-general.yml b2share1
+docker stack deploy -c docker-compose.yml b2
 ```

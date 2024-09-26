@@ -10,7 +10,7 @@ services:
             - "B2ACCESS_SECRET_KEY=${B2ACCESS_SECRET_KEY}"
             - "USE_STAGING_B2ACCESS=1"
             - "B2SHARE_SECRET_KEY=xyz"
-            - "B2SHARE_JSONSCHEMAS_HOST=https://86.50.228.13"
+            - "B2SHARE_JSONSCHEMAS_HOST=86.50.228.13"
             - "INIT_DB_AND_INDEX=1"
             - "LOAD_DEMO_COMMUNITIES_AND_RECORDS=1"
             - "B2SHARE_PREFERRED_URL_SCHEME=https"
@@ -22,7 +22,7 @@ services:
             - "B2SHARE_CELERY_BROKER_URL='amqp://b2share1:xyz@mq:5672/'"
             - "B2SHARE_CELERY_RESULT_BACKEND='redis://redis:6379/2'"
             - "B2SHARE_SEARCH_ELASTIC_HOSTS='elasticsearch'"
-            - "B2SHARE_LOGGING_LEVEL=${B2SHARE_LOGGING_LEVEL}"
+            - "B2SHARE_LOGGING_LEVEL=DEBUG"
         volumes:
             - "/data/b2share/b2share-data:/usr/var/b2share-instance"
             # - "./elasticsearch/mappings/record-view:/usr/local/lib/python3.6/site-packages/invenio_stats/contrib/record_view/v2"
@@ -32,6 +32,8 @@ services:
             placement:
               constraints:
                 - node.hostname==swarm-1.novalocal
+        networks:
+          - b2
 
     # b2share:
     #     extends: b2share-base
@@ -53,6 +55,8 @@ services:
             placement:
               constraints:
                 - node.hostname==swarm-1.novalocal
+        networks:
+          - b2
 
     # b2share-test:
     #     extends: b2share-base
@@ -82,3 +86,7 @@ services:
     #         - "POSTGRES_USER=${B2SHARE_POSTGRESQL_USER}"
     #     volumes:
     #         - "${B2SHARE_1_DATADIR}/db_dump:/usr/local/share/pgsql_dumps"
+
+networks:
+  b2:
+    external: true
